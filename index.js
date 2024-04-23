@@ -1,19 +1,25 @@
 const express = require('express');
-const userApi = require('./api/usuario');
-
+const UserApi = require('./api/usuario');
+const PostApi = require('./api/postagem');
 const database = require('./config/database');
 
-console.log('Starting server....')
-const app = express()
-app.use(express.json())
+console.log('Starting server....');
+const app = express();
+app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send({ response: 'Hello World!' });
-})
-app.post('/users', userApi.criarUsuario);
-app.get('/users', userApi.listarUsuario);
-app.put('/users/:id', userApi.alterarUsuario);
-app.delete('/users/:id', userApi.deletarUsuario);
+app.post('/users', UserApi.criarUsuario);
+app.get('/users', UserApi.listarUsuarios);
+app.get('/users/:id', UserApi.obterUsuarioPorId);
+app.put('/users/:id', UserApi.alterarUsuario);
+app.delete('/users/:id', UserApi.deletarUsuario);
+app.get('/users/:id/post', UserApi.obterPostagensPorAutorId);
+
+app.post('/post', PostApi.criarPostagem);
+app.get('/post', PostApi.listarPostagens);
+app.get('/post/:id', PostApi.obterPostagemPorId);
+app.put('/post/:id', PostApi.alterarPostagem);
+app.delete('/post/:id', PostApi.deletarPostagem);
+
 
 
 database.db.sync({ force: true })

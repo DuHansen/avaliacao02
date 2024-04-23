@@ -1,4 +1,5 @@
-const controller = require('../controllers/usuario');
+const UserController = require('../controllers/usuario');
+
 
 class UserApi {
     async criarUsuario(req, res) {
@@ -7,8 +8,9 @@ class UserApi {
         const senha = req.body.senha;
 
         try {
-            const user = await controller.criarUsuario(nome, email, senha);
-            return res.status(201).send(user);
+            const usuario = await UserController.criarUsuario(nome, email, senha);
+            
+            return res.status(201).send(usuario);
         } catch (error) {
             return res.status(400).send({ error: error.message })
         }
@@ -17,10 +19,11 @@ class UserApi {
     async alterarUsuario(req, res) {
         const { id } = req.params;
         const { nome, email, senha } = req.body;
+       
 
         try {
-            const user = await controller.alterarUsuario(Number(id), nome, email, senha);
-            return res.status(200).send(user);
+            await UserController.alterarUsuario(Number(id), nome, email, senha);
+            return res.status(200).send({ message: "Usuario adicionado com sucesso!" });
         } catch (error) {
             return res.status(400).send({ error: error.message })
         }
@@ -28,48 +31,49 @@ class UserApi {
 
     async deletarUsuario(req, res) {
         const { id } = req.params;
+        
 
         try {
-            await controller.deletarUsuario(Number(id));
-            return res.status(204).send();
+            await UserController.deletarUsuario(Number(id));
+            return res.status(200).send({ message: "Usuario adicionado com sucesso!" });
         } catch (error) {
             return res.status(400).send({ error: error.message })
         }
     }
 
-    async listarUsuario(req, res) {
+    async listarUsuarios(req, res) {
+       
 
         try {
-            const users = await controller.listarUsuarios();
+            const users = await UserController.listarUsuarios();
             return res.status(200).send(users);
         } catch (error) {
             return res.status(400).send({ error: error.message })
         }
     }
 
-    // Método para login
-    async login(req, res) {
+    async obterUsuarioPorId(req, res) {
+        const { id } = req.params;
+        
+
         try {
-            const { email, senha } = req.body;
-            const token = await controller.login(email, senha);
-            return res.status(200).send(token);
+            const usuario = await UserController.obterUsuarioPorId(Number(id));
+            return res.status(200).send(usuario);
         } catch (error) {
             return res.status(400).send({ error: error.message })
         }
     }
 
-    // Método para validar o token
-    async validarToken(req, res, next) {
-        const token = req.headers.authorization;
-
+    async obterPostagensPorAutorId(req, res) {
+        const { id: autorID } = req.params;
+    
         try {
-            await controller.validarToken(token);
-            next();
+            const postagens = await UserController.obterPostagensPorAutorId(Number(autorID));
+            return res.status(200).send(postagens);
         } catch (error) {
-            return res.status(400).send({ error: error.message })
+            return res.status(400).send({ error: error.message });
         }
     }
 }
 
 module.exports = new UserApi();
-

@@ -1,51 +1,19 @@
 const User = require('../models/usuario');
+const Postagem = require('../models/postagem');
 
 class UserController {
     async criarUsuario(nome, email, senha) {
-        if (
-            nome === undefined
-            || email === undefined
-            || senha === undefined
-        ) {
-            loggerController.createLog('error', 'Nome, email e senha são obrigatórios');
+        if (!nome || !email || !senha) {
             throw new Error('Nome, email e senha são obrigatórios');
         }
 
-        // Cria um hash da senha a partir do bcrypt com 10 rounds
-        const senhaCriptografada = await bcrypt.hash(senha, saltRounds);
-
-        // INSERT INTO users (nome, email, senha) VALUES (nome, email, senha);
-        const user = await User
-            .create({ nome, email, senha: senhaCriptografada });
-        loggerController.createLog('success', 'Usuário criado com sucesso');
-
-        return user;
-    }
-
-    async buscarPorId(id) {
-        if (id === undefined) {
-            loggerController.createLog('error', 'Id é obrigatório');
-            throw new Error('Id é obrigatório');
-        }
-
-        const user = await User.findByPk(id);
-
-        if (!user) {
-            loggerController.createLog('error', 'Usuário não encontrado');
-            throw new Error('Usuário não encontrado');
-        }
+        const user = await User.create({ nome, email, senha});
 
         return user;
     }
 
     async alterarUsuario(id, nome, email, senha) {
-        if (
-            id === undefined
-            || nome === undefined
-            || email === undefined
-            || senha === undefined
-        ) {
-            loggerController.createLog('error', 'Id, nome, email e senha são obrigatórios');
+        if (!id || !nome || !email || !senha) {
             throw new Error('Id, nome, email e senha são obrigatórios');
         }
 
@@ -53,31 +21,61 @@ class UserController {
 
         user.nome = nome;
         user.email = email;
-        // Cria um hash da senha a partir do bcrypt com 10 rounds
-        const senhaCriptografada = await bcrypt.hash(senha, saltRounds);
-        user.senha = senhaCriptografada;
-        // UPDATE users SET nome = nome, email = email, senha = senha WHERE id = id;
-        user.save();
-        loggerController.createLog('success', 'Usuário alterado com sucesso');
+        user.senha = await bcrypt.hash(senha, saltRounds);
+        await user.save();
 
         return user;
     }
 
     async deletarUsuario(id) {
-        if (id === undefined) {
-            loggerController.createLog('error', 'Id é obrigatório');
+        if (!id) {
             throw new Error('Id é obrigatório');
         }
 
-        const user = await this.buscarPorId(id);
-
-        user.destroy();
-        loggerController.createLog('success', 'Usuário deletado com sucesso');
+        const user = await this.obterUsuarioPorId(id);
+        await user.destroy();
     }
 
     async listarUsuarios() {
-        loggerController.createLog('success', 'Listando usuários');
         return User.findAll();
+    }
+
+    async obterUsuarioPorId(id) {
+        if (!id) {
+            throw new Error('Id é obrigatório');
+        }
+
+        const user = await User.findByPk(id);
+
+        if (!user) {
+            throw new Error('Usuário não encontrado');
+        }
+
+        return user;
+    }
+
+    async obterPostagensPorAutorId(autorID) {
+        
+            if (!autorID) {
+                throw new Error('autorID é obrigatório');
+            }
+    
+            const postagens = await Postagem.findAll({ 
+                where: {
+                    autorID: autorID
+                }
+                /* Para incluir o autor da postagem no json
+                ,
+                include: [{ model: User, as: 'autor' }]
+                */
+            });
+    
+            if (!postagens) {
+                throw new Error('Postagens não encontradas para este autorID');
+            }
+    
+            return postagens;
+        
     }
 }
 

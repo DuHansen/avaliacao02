@@ -1,8 +1,9 @@
+// arquivo usuario.js
 const database = require('../config/database');
 
 class User {
     constructor() {
-        this.model = database.db.define('usuario', {
+        this.model = database.db.define('users', {
             id: {
                 type: database.db.Sequelize.INTEGER,
                 primaryKey: true,
@@ -21,4 +22,6 @@ class User {
     }
 }
 
-module.exports = (new User).model;
+module.exports = new User().model;  // exporta a instância do modelo
+
+

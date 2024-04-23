@@ -1,27 +1,38 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../database.js');
+// arquivo postagem.js
+const database = require('../config/database');
+const User = require('./usuario');
 
-const Postagem = sequelize.define('postagens', {
-    id: {
-        primaryKey: true,
-        type: DataTypes.INTEGER
-    },
-    titulo: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    conteudo: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    autorId: {
-        secundaryKey: true,
-        type: DataTypes.INTEGER
+class Postagem {
+    constructor() {
+        this.model = database.db.define('postagems', {
+            id: {
+                type: database.db.Sequelize.INTEGER,
+                primaryKey: true,
+                autoIncrement: true
+            },
+            titulo: {
+                type: database.db.Sequelize.STRING,
+                allowNull: false
+            },
+            conteudo: {
+                type: database.db.Sequelize.STRING,
+                allowNull: false
+            },
+            autorID: {
+                type: database.db.Sequelize.INTEGER,
+                allowNull: false,
+                references: {         
+                    model: User, 
+                    key: 'id'          
+                }
+                
+            }
+        });
+
+        this.model.belongsTo(User, { foreignKey: 'autorID', as: 'autor' });
+        
     }
-    
-}, {
-    createdAt: false,
-    updatedAt: false
-});
+}
 
-module.exports = Postagem;
+module.exports = new Postagem().model;  // exporta a instância do modelo
+
